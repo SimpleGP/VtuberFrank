@@ -1,0 +1,6 @@
+{
+  "name": "frank-vtuber",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test tests/avatar.test.mjs"}
+}

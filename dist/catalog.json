@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "heroes": [
+    {
+      "id": "base",
+      "name": "Richard",
+      "skin": "Original",
+      "idle": "assets/avatars/base-idle.png",
+      "talk": "assets/avatars/base-talk.png",
+      "portrait": null,
+      "calibrated": false
+    },
+    {
+      "id": "sigma",
+      "name": "Sigma",
+      "skin": "Hielo",
+      "idle": "assets/avatars/sigma-idle.png",
+      "talk": "assets/avatars/sigma-talk.png",
+      "portrait": "assets/portraits/sigma.png",
+      "calibrated": true
+    },
+    {
+      "id": "ramattra",
+      "name": "Ramattra",
+      "skin": "Robot amarillo",
+      "idle": "assets/avatars/ramattra-idle.png",
+      "talk": "assets/avatars/ramattra-talk.png",
+      "portrait": "assets/portraits/ramattra.png",
+      "calibrated": true
+    },
+    {
+      "id": "mauga",
+      "name": "Mauga",
+      "skin": "Guerrero rojo",
+      "idle": "assets/avatars/mauga-idle.png",
+      "talk": "assets/avatars/mauga-talk.png",
+      "portrait": "assets/portraits/mauga.png",
+      "calibrated": true
+    },
+    {
+      "id": "sombra",
+      "name": "Sombra",
+      "skin": "Felina morada",
+      "idle": "assets/avatars/sombra-idle.png",
+      "talk": "assets/avatars/sombra-talk.png",
+      "portrait": "assets/portraits/sombra.png",
+      "calibrated": true
+    },
+    {
+      "id": "illari",
+      "name": "Illari",
+      "skin": "Verano",
+      "idle": "assets/avatars/illari-idle.png",
+      "talk": "assets/avatars/illari-talk.png",
+      "portrait": "assets/portraits/illari.png",
+      "calibrated": true
+    },
+    {
+      "id": "ashe",
+      "name": "Ashe",
+      "skin": "Novia rosa",
+      "idle": "assets/avatars/ashe-idle.png",
+      "talk": "assets/avatars/ashe-talk.png",
+      "portrait": "assets/portraits/ashe.png",
+      "calibrated": true
+    },
+    {
+      "id": "sojourn",
+      "name": "Sojourn",
+      "skin": "Cibernética blanca",
+      "idle": "assets/avatars/sojourn-idle.png",
+      "talk": "assets/avatars/sojourn-talk.png",
+      "portrait": "assets/portraits/sojourn.png",
+      "calibrated": true
+    },
+    {
+      "id": "cassidy",
+      "name": "Cassidy",
+      "skin": "Detective",
+      "idle": "assets/avatars/cassidy-idle.png",
+      "talk": "assets/avatars/cassidy-talk.png",
+      "portrait": "assets/portraits/cassidy.png",
+      "calibrated": true
+    },
+    {
+      "id": "genji",
+      "name": "Genji",
+      "skin": "Caballero azul",
+      "idle": "assets/avatars/genji-idle.png",
+      "talk": "assets/avatars/genji-talk.png",
+      "portrait": "assets/portraits/genji.png",
+      "calibrated": true
+    },
+    {
+      "id": "junker-queen",
+      "name": "Junker Queen",
+      "skin": "Gladiadora",
+      "idle": "assets/avatars/junker-queen-idle.png",
+      "talk": "assets/avatars/junker-queen-talk.png",
+      "portrait": "assets/portraits/junker-queen.png",
+      "calibrated": false
+    }
+  ]
+}

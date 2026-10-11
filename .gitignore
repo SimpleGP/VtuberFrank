@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+user-data/
+settings.json
+generated/
+*.log
+node_modules/
+.DS_Store
+dist/.DS_Store
+
