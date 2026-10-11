@@ -84,33 +84,29 @@ class Detector:
 
 
 class HeroScanGate:
-    """One three-frame burst per physical press: .5s wait, .15s between frames."""
+    """One portrait check per physical press, after a .5s wait."""
     def __init__(self):
         self.down = False
         self.due = None
-        self.remaining = 0
 
     def request(self, now, delay=.5):
         self.due = now + delay
-        self.remaining = 3
 
     def update(self, down, now, enabled=True):
         rising = down and not self.down
         self.down = down
         if not enabled:
-            self.confirmed()
+            self.cancel()
             return False
         if rising:
             self.request(now)
         if self.due is None or now < self.due:
             return False
-        self.remaining -= 1
-        self.due = now + .15 if self.remaining else None
+        self.cancel()
         return True
 
-    def confirmed(self):
+    def cancel(self):
         self.due = None
-        self.remaining = 0
 
 
 def monitor(shared, stop, remember):
@@ -118,7 +114,6 @@ def monitor(shared, stop, remember):
     from mss import MSS
     try:
         game, detector, gate = GameWindow(), Detector(), HeroScanGate()
-        candidate, hits = None, 0
         with MSS() as capture:
             while not stop.wait(.025):
                 now = time.monotonic()
@@ -127,7 +122,7 @@ def monitor(shared, stop, remember):
                     detector = Detector()
                     shared.update(reload_templates=False)
                 client = game.rectangle()
-                enabled = snapshot['hero_mode'] == 'auto' and client is not None
+                enabled = snapshot['hero_mode'] == 'auto'
                 due = gate.update(game.scan_key_down(), now, enabled)
                 request = snapshot.get('scan_request')
                 if request is not None and now >= request:
@@ -135,37 +130,24 @@ def monitor(shared, stop, remember):
                         gate.request(now, delay=0)
                         due = gate.update(False, now, True)
                         shared.update(scan_request=None)
-                    elif now >= request + 5:
-                        shared.update(scan_request=None, overwatch=dict(
-                            status='Abre Overwatch y vuelve a revisar', visible=False, confidence=0))
-                if client is None:
-                    shared.update(overwatch=dict(status='Abre Overwatch · tecla encima de Tab',
-                                                  visible=False, confidence=0))
-                    candidate, hits = None, 0
-                    continue
+                    else:
+                        shared.update(scan_request=None)
                 if not due:
                     continue  # No screenshots or continuous recognition between presses.
-                if gate.remaining == 2:
-                    candidate, hits = None, 0
-                region = np.asarray(capture.grab(portrait_rectangle(client)))[:, :, :3]
-                observation = detector.recognize_region(region)
-                hits = hits + 1 if observation.hero and candidate == observation.hero else (1 if observation.hero else 0)
-                candidate = observation.hero
-                status = 'Revisando retrato…'
-                if observation.hero and hits >= 2:
-                    shared.update(hero=observation.hero)
-                    remember(observation.hero)
-                    gate.confirmed()
-                    status = 'Héroe confirmado · revisa de nuevo con la tecla'
-                elif gate.due is None:
-                    shared.update(hero='base')
-                    remember('base')
-                    status = 'Sin coincidencia · Richard original'
+                observation = Observation()
+                if client is not None:
+                    region = np.asarray(capture.grab(portrait_rectangle(client)))[:, :, :3]
+                    observation = detector.recognize_region(region)
+                selected = observation.hero or 'base'
+                shared.update(hero=selected)
+                remember(selected)
+                status = ('Héroe confirmado · revisa de nuevo con la tecla' if observation.hero
+                          else 'Sin coincidencia · Richard original')
                 with shared.lock:
                     shared.data['hero_scan']['count'] += 1
-                    if observation.hero and hits >= 2:
+                    if observation.hero:
                         shared.data['hero_scan']['confirmed'] += 1
-                    shared.data['overwatch'] = dict(status=status, visible=True,
+                    shared.data['overwatch'] = dict(status=status, visible=client is not None,
                                                   confidence=round(observation.confidence, 3),
                                                   source=observation.source)
     except Exception as error:
