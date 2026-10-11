@@ -77,7 +77,8 @@ bridge.addEventListener('state', event => {
   state = event.detail;
   document.body.classList.add('connected');
   byId('connection-label').textContent = 'Avatar conectado';
-  byId('local-status').textContent = state.speaking ? 'Tu voz abre la boca de Richard.' : 'Voz conectada · Richard está en reposo.';
+  const voiceUnavailable = /Vista previa|No disponible|No se pudo|Se desconectó/.test(state.microphone || '');
+  byId('local-status').textContent = voiceUnavailable ? state.microphone : state.speaking ? 'Tu voz abre la boca de Richard.' : 'Voz conectada · Richard está en reposo.';
   byId('game-status').textContent = state.overwatch?.status || 'Tecla encima de Tab para revisar';
   byId('detection-note').textContent = state.hero_mode === 'auto' ? 'Con Overwatch al frente, pulsa la tecla para cambiar de personaje.' : 'Skin manual. Activa Automático para reconocer al héroe.';
   byId('calibration-save').disabled = false;

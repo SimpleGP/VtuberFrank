@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath $taskPython)) {
     elseif (Test-Path -LiteralPath 'D:\Vtuber\.venv\Scripts\python.exe') {
         & 'D:\Vtuber\.venv\Scripts\python.exe' -m venv (Join-Path $taskRoot '.venv')
     } else { & python -m venv (Join-Path $taskRoot '.venv') }
-    if ($LASTEXITCODE -ne 0) { throw 'Instala Python 3.11 o posterior y vuelve a iniciar.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Instala Python 3.12 o posterior y vuelve a iniciar.' }
     & $taskPython -m pip install -r (Join-Path $taskRoot 'requirements.txt')
     if ($LASTEXITCODE -ne 0) { throw 'No se pudieron instalar las dependencias.' }
 }

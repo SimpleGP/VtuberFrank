@@ -9,4 +9,4 @@
 7. Habla para alternar la boca abierta y cerrada. Conserva tu fuente de micrófono y su configuración actual en OBS; este proyecto no las modifica. No hay animaciones ni seguimiento de WASD/mouse, ni fuente de chat.
 8. Si otra apariencia del héroe no se reconoce, abre **Usar el retrato de otra skin**, elige el personaje y añade una captura del juego. Para la gladiadora de Junker Queen, añade su retrato o elige esa skin manualmente.
 
-Usa la URL local del paso 4 en la fuente de navegador de OBS. La página de GitHub sirve para ver las skins y conectar el panel; el avatar del directo necesita que el iniciador local permanezca abierto.
+Usa la URL local del paso 4 en la fuente de navegador de OBS. El avatar del directo necesita que el iniciador local permanezca abierto.

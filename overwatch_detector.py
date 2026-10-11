@@ -170,4 +170,3 @@ def monitor(shared, stop, remember):
                                                   source=observation.source)
     except Exception as error:
         shared.update(overwatch=dict(status=f'Detección no disponible: {error}', visible=False, confidence=0))
-
