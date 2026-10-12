@@ -7,6 +7,8 @@ const bridge = new LocalBridge();
 let state = {hero: 'base', speaking: false, hero_mode: 'manual'};
 let previewMouth = null;
 let changingHero = false;
+let closingServer = false;
+let serverClosed = false;
 const byId = id => document.getElementById(id);
 
 function render() {
@@ -24,6 +26,8 @@ function render() {
   byId('auto-button').classList.toggle('selected', state.hero_mode === 'auto');
   byId('auto-button').setAttribute('aria-pressed', String(state.hero_mode === 'auto'));
   byId('scan-button').disabled = !bridge.connected;
+  byId('shutdown-button').disabled = !bridge.connected || closingServer;
+  byId('connect-button').disabled = closingServer;
   byId('mouth-live').hidden = !bridge.connected || previewMouth === null;
   document.querySelectorAll('[data-mouth]').forEach(button => button.classList.toggle('selected',
     (button.dataset.mouth === 'talk') === speaking));
@@ -73,7 +77,7 @@ byId('scan-button').onclick = async () => {
 };
 
 bridge.addEventListener('state', event => {
-  if (changingHero) return;
+  if (changingHero || closingServer || serverClosed) return;
   state = event.detail;
   document.body.classList.add('connected');
   byId('connection-label').textContent = 'Avatar conectado';
@@ -87,16 +91,36 @@ bridge.addEventListener('state', event => {
 });
 bridge.addEventListener('offline', () => {
   document.body.classList.remove('connected');
-  byId('connection-label').textContent = 'Vista previa';
+  byId('connection-label').textContent = serverClosed ? 'Servidor cerrado' : 'Vista previa';
   byId('connect-button').textContent = 'Conectar avatar local';
-  byId('local-status').textContent = 'Inicia FrankVtuber en tu PC para conectar la voz y la detección.';
+  byId('local-status').textContent = serverClosed
+    ? 'Servidor cerrado. Abre Iniciar FrankVtuber.vbs para volver a usar el avatar.'
+    : 'Inicia FrankVtuber en tu PC para conectar la voz y la detección.';
   byId('calibration-save').disabled = true;
   state.speaking = false; render();
 });
 byId('connect-button').onclick = async () => {
+  serverClosed = false;
   byId('local-status').textContent = 'Conectando…';
   try { previewMouth = null; await bridge.connect(); }
   catch { byId('local-status').textContent = 'Inicia FrankVtuber.vbs y vuelve a conectar. También puedes abrir el panel local.'; }
+};
+byId('shutdown-button').onclick = async () => {
+  closingServer = true;
+  byId('shutdown-button').textContent = 'Cerrando…';
+  render();
+  try {
+    await bridge.request('shutdown', {});
+    serverClosed = true;
+    previewMouth = null;
+    bridge.disconnect();
+  } catch (error) {
+    byId('local-status').textContent = `No se pudo cerrar el servidor: ${error.message}`;
+  } finally {
+    closingServer = false;
+    byId('shutdown-button').textContent = 'Cerrar servidor';
+    render();
+  }
 };
 byId('overlay-link').href = new URL('avatar.html', localBase).href;
 

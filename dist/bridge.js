@@ -23,9 +23,11 @@ export class LocalBridge extends EventTarget {
     if (!this.running) return;
     try {
       const state = await this.request('state');
+      if (!this.running) return;
       this.connected = true; this.failures = 0;
       this.dispatchEvent(new CustomEvent('state', {detail: state}));
     } catch (error) {
+      if (!this.running) return;
       if (++this.failures >= 3) {
         this.connected = false; this.running = false;
         this.dispatchEvent(new CustomEvent('offline', {detail: error.message}));
@@ -33,5 +35,10 @@ export class LocalBridge extends EventTarget {
       }
     }
     setTimeout(() => this.poll(), 50);
+  }
+  disconnect() {
+    this.connected = false;
+    this.running = false;
+    this.dispatchEvent(new CustomEvent('offline'));
   }
 }
