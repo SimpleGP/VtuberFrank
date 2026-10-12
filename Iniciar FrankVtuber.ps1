@@ -21,11 +21,10 @@ if (-not (Test-Path -LiteralPath $taskPython)) {
 }
 $taskSettings = Join-Path $taskRoot 'settings.json'
 if (-not (Test-Path -LiteralPath $taskSettings)) {
-    $taskConfig = @{ threshold = -38; last_hero = 'base'; hero_mode = 'auto' }
+    $taskConfig = @{ threshold = -50; last_hero = 'base'; hero_mode = 'auto' }
     if (Test-Path -LiteralPath 'D:\Vtuber\settings.json') {
         $taskPrior = Get-Content -Raw -LiteralPath 'D:\Vtuber\settings.json' | ConvertFrom-Json
         if ($taskPrior.microphone_endpoint) { $taskConfig.microphone_endpoint = $taskPrior.microphone_endpoint }
-        if ($null -ne $taskPrior.threshold) { $taskConfig.threshold = $taskPrior.threshold }
     }
     $taskConfig | ConvertTo-Json | Set-Content -LiteralPath $taskSettings -Encoding utf8
 }

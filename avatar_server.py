@@ -2,7 +2,6 @@
 import argparse
 import copy
 import json
-import math
 import mimetypes
 import os
 from pathlib import Path
@@ -10,6 +9,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
+from voice_activity import effective_threshold
 
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / 'dist'
@@ -23,10 +23,8 @@ class SharedState:
     def __init__(self, settings=None):
         settings = settings or {}
         self.lock = threading.RLock()
-        threshold = settings.get('threshold', -38)
-        if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not math.isfinite(threshold):
-            threshold = -38
-        self.data = dict(version=1, db=-100, speaking=False, threshold=max(-70, min(-10, threshold)),
+        threshold = effective_threshold(settings.get('threshold'))
+        self.data = dict(version=1, db=-100, speaking=False, threshold=threshold,
                          microphone='Preparando voz',
                          hero=settings.get('last_hero') if settings.get('last_hero') in HEROES else 'base',
                          hero_mode='manual' if settings.get('hero_mode') == 'manual' else 'auto',

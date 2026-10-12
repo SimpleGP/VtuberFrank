@@ -1,10 +1,10 @@
-"""Same WinMM volume sampling and six-control tracker as the supplied local project."""
+"""WinMM microphone volume sampling for the mouth only."""
 import array
 import ctypes as C
 from ctypes import wintypes as W
-import math
 import time
 from microphone_devices import select as select_microphone
+from voice_activity import VoiceGate, pcm_db
 
 class WaveFormat(C.Structure):
     _fields_ = [("tag", W.WORD), ("channels", W.WORD), ("rate", W.DWORD),
@@ -31,7 +31,7 @@ def microphone(shared, stop, settings):
     if result:
         state["microphone"] = f"No disponible (WinMM {result})"
         return
-    buffers = [C.create_string_buffer(4410) for _ in range(4)]
+    buffers = [C.create_string_buffer(1764) for _ in range(6)]  # 20 ms at 44.1 kHz, mono PCM16
     headers = [WaveHeader(C.cast(buf, C.c_void_p), len(buf), 0, 0, 0, 0, None, 0) for buf in buffers]
     prepared = []
     try:
@@ -47,17 +47,15 @@ def microphone(shared, stop, settings):
         if endpoint:
             settings['microphone_endpoint'] = endpoint
             pass  # Endpoint remains in local settings only.
-        hold_until = 0
+        gate = VoiceGate(state['threshold'])
         while not stop.wait(0.015):
             for header in headers:
                 if not header.flags & 1:
                     continue
                 samples = array.array("h", C.string_at(header.data, header.recorded))
-                rms = math.sqrt(sum(x * x for x in samples) / max(1, len(samples))) / 32768
-                state["db"] = round(20 * math.log10(max(rms, 0.00001)), 1)
-                if state["db"] >= state["threshold"]:
-                    hold_until = time.monotonic() + 0.15
-                state["speaking"] = time.monotonic() < hold_until
+                db = pcm_db(samples)
+                speaking = gate.update(db, time.monotonic())
+                shared.update(db=db, speaking=speaking)
                 header.recorded = 0
                 if api.waveInAddBuffer(handle, C.byref(header), C.sizeof(header)):
                     raise RuntimeError("Se desconectó el micrófono")
