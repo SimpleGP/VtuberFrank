@@ -50,12 +50,21 @@ class Detector:
         self.templates = {}
         for hero in self.heroes:
             files = [root / 'dist/assets/portraits' / f'{hero}.png']
+            files += sorted((root / 'dist/assets/portraits' / hero).glob('*.png'))
             files += list((root / 'user-data/templates' / hero).glob('*.png'))
             images = [cv2.imdecode(np.fromfile(str(p), dtype=np.uint8), cv2.IMREAD_COLOR)
                       for p in files if p.is_file()]
             self.templates[hero] = [image for image in images if image is not None]
         if not any(self.templates.values()):
             raise ValueError('Faltan los retratos de referencia')
+        # HUD portraits can have different sizes/aspect ratios after screen scaling.
+        # Cache the variations so pressing the key does not resize every reference.
+        self.match_templates = {
+            hero: [cv2.resize(template, None, fx=sx, fy=sy)
+                   for template in templates
+                   for sx in (.65, .8, 1, 1.2) for sy in (.85, 1, 1.15)]
+            for hero, templates in self.templates.items()
+        }
 
     def recognize_region(self, region):
         if region is None or not region.size:
@@ -63,7 +72,7 @@ class Detector:
         x, y, right, bottom = ROI
         region = cv2.resize(region[:, :, :3], (right - x, bottom - y))
         ranked = []
-        for hero, templates in self.templates.items():
+        for hero, templates in self.match_templates.items():
             score = 0.0
             for template in templates:
                 height, width = template.shape[:2]

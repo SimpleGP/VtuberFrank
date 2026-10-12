@@ -77,6 +77,27 @@ class DetectionTests(unittest.TestCase):
         self.assertEqual(area, dict(left=130, top=880, width=145, height=210))
         self.assertLess(area['width'] * area['height'], 1920 * 1080 / 50)
 
+    def test_reported_cassidy_genji_and_junker_queen_hud_regressions(self):
+        for hero in ('cassidy', 'genji', 'junker-queen'):
+            region = cv2.imread(str(ROOT / 'tests/fixtures' / f'{hero}-hud.png'))
+            with self.subTest(hero=hero):
+                self.assertEqual(self.detector.recognize_region(region).hero, hero)
+                altered = np.clip(region.astype(float) * .8 + 10, 0, 255).astype(np.uint8)
+                encoded = cv2.imencode('.jpg', altered, [cv2.IMWRITE_JPEG_QUALITY, 60])[1]
+                compressed = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
+                self.assertEqual(self.detector.recognize_region(compressed).hero, hero)
+
+    def test_portrait_size_and_aspect_changes(self):
+        for hero in ('cassidy', 'genji', 'junker-queen'):
+            template = self.detector.templates[hero][-1]
+            for sx, sy in ((.65, 1), (.8, .85), (1.2, 1.15)):
+                scaled = cv2.resize(template, None, fx=sx, fy=sy)
+                height, width = scaled.shape[:2]
+                region = np.full((210, 145, 3), 70, dtype=np.uint8)
+                region[30:30 + height, 10:10 + width] = scaled
+                with self.subTest(hero=hero, width=sx, height=sy):
+                    self.assertEqual(self.detector.recognize_region(region).hero, hero)
+
 
 class GateTests(unittest.TestCase):
     def test_one_check_after_half_second_and_hold_does_not_repeat(self):

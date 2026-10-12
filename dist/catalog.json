@@ -98,7 +98,7 @@
       "idle": "assets/avatars/junker-queen-idle.png",
       "talk": "assets/avatars/junker-queen-talk.png",
       "portrait": "assets/portraits/junker-queen.png",
-      "calibrated": false
+      "calibrated": true
     }
   ]
 }
